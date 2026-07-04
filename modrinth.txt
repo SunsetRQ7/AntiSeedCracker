@@ -1,0 +1,70 @@
+# AntiSeedCracker
+
+**Stop seed crackers. Silently. Permanently.**
+
+AntiSeedCracker is a professional, multi-layer world seed protection plugin for **Paper**, **Purpur**, and **Folia**. It defeats every known technique that cheat clients, ghost clients, and tools like SeedCrackerX use to recover your world seed — without ever kicking, banning, or even alerting the player. Cheaters simply receive cryptographically random garbage and never know why their cracker fails.
+
+---
+
+## Why protect your seed?
+
+Once a player knows your world seed, they can compute the exact location of every stronghold, ancient city, buried treasure, ore vein, and slime chunk on your server — from an external tool, with no in-game effort. Seed knowledge is wallhack-grade ESP for the entire map. AntiSeedCracker closes every leak.
+
+## Protection layers
+
+- **Packet-level seed spoofing** — replaces the hashed seed in JOIN_GAME and RESPAWN packets with a per-player, cryptographically random fake before it ever leaves the server (Netty-level via bundled PacketEvents).
+- **Dynamic seed rotation** — every player's fake seed rotates on a configurable interval, defeating crackers that accumulate data across sessions.
+- **Plugin API protection** — patches the internal seed field every second, so even other plugins calling `World.getSeed()` receive a fake value.
+- **Eye of Ender redirection** — thrown Eyes fly toward a per-player fake stronghold with randomized angular jitter, making triangulation useless.
+- **/locate spoofing** — returns convincing fake coordinates; stronghold queries stay consistent with Eye of Ender behavior.
+- **Seed command blocking** — /seed and friends are blocked for players, console, RCON, and stripped from tab-complete.
+- **End spike randomization** — shuffles the bedrock cap heights of the ten End pillars, destroying the vanilla height fingerprint that uniquely identifies a seed.
+- **End City fingerprint removal** — replaces the distinctive magenta glass pattern in End Cities.
+- **Treasure & explorer map scrambling** — structure icons on maps are randomized in the MAP_DATA packet.
+- **Audit log** — every blocked attempt is recorded to a lightweight flat-file log, with /asc stats summaries in-game.
+
+## Never punishes players
+
+AntiSeedCracker follows a strict no-punishment philosophy: no kicks, no bans, no warnings. Cheat tools silently fail while legitimate gameplay is completely unaffected.
+
+## Safe for your world
+
+- The real seed is never read into logs, files, or network traffic.
+- World generation is never altered — protection happens at the packet and API layer.
+- Optional cosmetic changes (End spike caps, End City glass) are single-block, physics-free, run at most once per chunk, and can be disabled in the config.
+- Verified by live testing on Paper 26.1.2 and Folia 26.1.2 with zero errors and untouched world generation.
+
+## Performance
+
+Fully asynchronous by design. Packet work runs on Netty I/O threads with lock-free map lookups; periodic tasks use the async scheduler; on Folia, block operations are dispatched to the owning region thread. Zero measurable TPS impact.
+
+## Requirements & compatibility
+
+| | |
+|---|---|
+| Server software | Paper, Purpur, or Folia |
+| Minecraft version | 26.1 and newer (26.1.x – 26.2) |
+| Java | 25 or newer |
+| Dependencies | None — PacketEvents is bundled |
+
+Spigot/CraftBukkit and legacy Minecraft versions (1.16.5 – 25.x) are not supported by this release, as the plugin relies on modern Paper APIs for its async and region-threaded architecture.
+
+## Quick start
+
+1. Drop `AntiSeedCracker-3.2.0.jar` into your `plugins/` folder.
+2. Restart the server. Protection is active immediately with sensible defaults.
+3. Optionally tune `plugins/AntiSeedCracker/config.yml` (every layer, world list, message, and interval is configurable) and apply with `/asc reload`.
+
+## Commands
+
+- `/asc status` — see every protection layer at a glance
+- `/asc stats` — audit log statistics
+- `/asc reload` — apply config changes live
+- `/asc info` — version, platform, and update status
+
+Permission: `antiseedcracker.admin` (default: op)
+
+---
+
+**Open source** under the MIT License: https://github.com/SunsetRQ/AntiSeedCracker
+Issues and feature requests welcome on GitHub. Anonymous usage metrics via bStats (opt-out supported).
