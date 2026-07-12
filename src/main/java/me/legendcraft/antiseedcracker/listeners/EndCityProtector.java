@@ -16,6 +16,7 @@ import org.bukkit.generator.structure.GeneratedStructure;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BoundingBox;
 
 import java.util.Collection;
 
@@ -51,7 +52,9 @@ public final class EndCityProtector implements Listener {
                 if (structures.isEmpty()) return;
 
                 if (plugin.getPluginConfig().isEndCitiesModifyWorld()) {
-                    replaceGlassInChunk(chunk);
+                    for (GeneratedStructure structure : structures) {
+                        replaceGlassInBounds(chunk, structure.getBoundingBox());
+                    }
                 }
 
                 chunk.getPersistentDataContainer()
@@ -64,17 +67,21 @@ public final class EndCityProtector implements Listener {
         });
     }
 
-    private void replaceGlassInChunk(Chunk chunk) {
-        World world  = chunk.getWorld();
-        int   minY   = world.getMinHeight();
-        int   maxY   = world.getMaxHeight();
-        int   baseX  = chunk.getX() << 4;
-        int   baseZ  = chunk.getZ() << 4;
+    private void replaceGlassInBounds(Chunk chunk, BoundingBox bounds) {
+        World world = chunk.getWorld();
+        int   minY  = Math.max(world.getMinHeight(), (int) Math.floor(bounds.getMinY()));
+        int   maxY  = Math.min(world.getMaxHeight(), (int) Math.ceil(bounds.getMaxY()));
+        int   baseX = chunk.getX() << 4;
+        int   baseZ = chunk.getZ() << 4;
+        int   minX  = Math.max(baseX,     (int) Math.floor(bounds.getMinX()));
+        int   maxX  = Math.min(baseX + 15, (int) Math.ceil(bounds.getMaxX()));
+        int   minZ  = Math.max(baseZ,     (int) Math.floor(bounds.getMinZ()));
+        int   maxZ  = Math.min(baseZ + 15, (int) Math.ceil(bounds.getMaxZ()));
 
-        for (int dx = 0; dx < 16; dx++) {
-            for (int dz = 0; dz < 16; dz++) {
-                for (int y = minY; y < maxY; y++) {
-                    Block block = world.getBlockAt(baseX + dx, y, baseZ + dz);
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    Block block = world.getBlockAt(x, y, z);
                     if (block.getType() == Material.MAGENTA_STAINED_GLASS) {
                         block.setType(Material.PURPUR_BLOCK, false);
                     }

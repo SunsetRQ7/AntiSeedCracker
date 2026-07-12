@@ -24,7 +24,14 @@ public final class PluginConfig {
     private final boolean spoofLocateEnabled;
     private final int     spoofLocateMaxOffset;
 
-    private final boolean pluginApiProtectionEnabled;
+    private final boolean seedIntegrityMonitorEnabled;
+
+    private final boolean      slimeChunkObfuscationEnabled;
+    private final List<String> slimeChunkObfuscationWorlds;
+
+    private final boolean structureReconMonitorEnabled;
+    private final int     structureReconThreshold;
+    private final int     structureReconWindowSeconds;
 
     private final boolean      eyeOfEnderEnabled;
     private final List<String> eyeOfEnderWorlds;
@@ -67,7 +74,17 @@ public final class PluginConfig {
         this.spoofLocateMaxOffset = Math.max(100,
                 cfg.getInt("structure_protection.spoof_locate_command.max_offset", 2000));
 
-        this.pluginApiProtectionEnabled = cfg.getBoolean("plugin_api_protection.enabled", true);
+        this.seedIntegrityMonitorEnabled = cfg.getBoolean("seed_integrity_monitor.enabled", true);
+
+        this.slimeChunkObfuscationEnabled = cfg.getBoolean("slime_chunk_obfuscation.enabled", false);
+        this.slimeChunkObfuscationWorlds  = Collections.unmodifiableList(
+                cfg.getStringList("slime_chunk_obfuscation.worlds"));
+
+        this.structureReconMonitorEnabled = cfg.getBoolean("structure_recon_monitor.enabled", true);
+        this.structureReconThreshold      = Math.max(2,
+                cfg.getInt("structure_recon_monitor.threshold", 6));
+        this.structureReconWindowSeconds  = Math.max(30,
+                cfg.getInt("structure_recon_monitor.window_seconds", 900));
 
         this.eyeOfEnderEnabled     = cfg.getBoolean("eye_of_ender_protection.enabled", true);
         this.eyeOfEnderWorlds      = Collections.unmodifiableList(
@@ -121,7 +138,14 @@ public final class PluginConfig {
     public boolean isSpoofLocateEnabled()        { return spoofLocateEnabled; }
     public int     getSpoofLocateMaxOffset()     { return spoofLocateMaxOffset; }
 
-    public boolean isPluginApiProtectionEnabled() { return pluginApiProtectionEnabled; }
+    public boolean isSeedIntegrityMonitorEnabled() { return seedIntegrityMonitorEnabled; }
+
+    public boolean      isSlimeChunkObfuscationEnabled() { return slimeChunkObfuscationEnabled; }
+    public List<String> getSlimeChunkObfuscationWorlds() { return slimeChunkObfuscationWorlds; }
+
+    public boolean isStructureReconMonitorEnabled() { return structureReconMonitorEnabled; }
+    public int     getStructureReconThreshold()     { return structureReconThreshold; }
+    public int     getStructureReconWindowSeconds() { return structureReconWindowSeconds; }
 
     public boolean      isEyeOfEnderEnabled()      { return eyeOfEnderEnabled; }
     public List<String> getEyeOfEnderWorlds()      { return eyeOfEnderWorlds; }

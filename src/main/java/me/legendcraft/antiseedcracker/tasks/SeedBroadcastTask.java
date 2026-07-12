@@ -3,13 +3,10 @@ package me.legendcraft.antiseedcracker.tasks;
 import me.legendcraft.antiseedcracker.AntiSeedCrackerPlugin;
 import me.legendcraft.antiseedcracker.scheduler.CancelableTask;
 import me.legendcraft.antiseedcracker.scheduler.FoliaSchedulerUtil;
-import org.bukkit.World;
-
-import java.util.List;
 
 public final class SeedBroadcastTask implements Runnable {
 
-    public static final long PERIOD_MS = 1_000L;
+    public static final long PERIOD_MS = 15_000L;
 
     private final AntiSeedCrackerPlugin plugin;
     private volatile CancelableTask handle;
@@ -35,14 +32,8 @@ public final class SeedBroadcastTask implements Runnable {
 
     @Override
     public void run() {
-        if (plugin.getPluginConfig().isPluginApiProtectionEnabled()
-                && plugin.getWorldSeedInterceptor().isAvailable()) {
-
-            List<World> worlds = plugin.getServer().getWorlds();
-            for (World world : worlds) {
-                long fakeSeed = plugin.getSeedManager().assignWorldFakeSeed(world);
-                plugin.getWorldSeedInterceptor().patchWorld(world, fakeSeed);
-            }
+        if (plugin.getPluginConfig().isSeedIntegrityMonitorEnabled()) {
+            plugin.getSeedIntegrityMonitor().check(plugin.getServer().getWorlds());
         }
 
         plugin.getSeedManager().ensureAllPlayersHaveSeeds(

@@ -38,11 +38,15 @@ public final class PlayerSessionListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         plugin.getSeedManager().removePlayer(event.getPlayer().getUniqueId());
+        if (plugin.getStructureReconMonitor() != null) {
+            plugin.getStructureReconMonitor().removePlayer(event.getPlayer().getUniqueId());
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldUnload(WorldUnloadEvent event) {
         plugin.getSeedManager().forgetWorld(event.getWorld().getUID());
+        plugin.getSeedIntegrityMonitor().forgetWorld(event.getWorld().getUID());
     }
 
     public void initPlayer(Player player) {

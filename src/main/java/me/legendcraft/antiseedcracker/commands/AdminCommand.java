@@ -83,8 +83,9 @@ public final class AdminCommand implements CommandExecutor, TabCompleter {
         boolean citiesEnabled      = plugin.getPluginConfig().isEndCitiesEnabled();
         boolean eyeEnabled         = plugin.getPluginConfig().isEyeOfEnderEnabled();
         boolean locateEnabled      = plugin.getPluginConfig().isSpoofLocateEnabled();
-        boolean pluginApiEnabled   = plugin.getPluginConfig().isPluginApiProtectionEnabled();
-        boolean interceptorActive  = plugin.getWorldSeedInterceptor().isAvailable();
+        boolean integrityEnabled   = plugin.getPluginConfig().isSeedIntegrityMonitorEnabled();
+        boolean slimeObfEnabled    = plugin.getPluginConfig().isSlimeChunkObfuscationEnabled();
+        boolean reconEnabled       = plugin.getPluginConfig().isStructureReconMonitorEnabled();
         boolean mapProtEnabled     = plugin.getPluginConfig().isTreasureMapProtectionEnabled();
         boolean dbEnabled          = plugin.getDatabaseManager() != null;
         int     trackedSeeds       = plugin.getSeedManager().trackedCount();
@@ -100,7 +101,9 @@ public final class AdminCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(statusLine("End City Protection",      citiesEnabled));
         sender.sendMessage(statusLine("Eye of Ender Redirect",    eyeEnabled));
         sender.sendMessage(statusLine("/locate Spoof",            locateEnabled));
-        sender.sendMessage(statusLine("Plugin API Protection",    pluginApiEnabled && interceptorActive));
+        sender.sendMessage(statusLine("Seed Integrity Monitor",   integrityEnabled));
+        sender.sendMessage(statusLine("Slime Chunk Obfuscation",  slimeObfEnabled));
+        sender.sendMessage(statusLine("Structure Recon Monitor",  reconEnabled));
         sender.sendMessage(statusLine("Treasure Map Scramble",    mapProtEnabled));
         sender.sendMessage(statusLine("Database / Audit Log",     dbEnabled));
         sender.sendMessage(msg(

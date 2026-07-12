@@ -24,8 +24,17 @@ structure_protection:
     enabled: true
     max_offset: 2000
 
-plugin_api_protection:
+seed_integrity_monitor:
   enabled: true
+
+slime_chunk_obfuscation:
+  enabled: false
+  worlds: []
+
+structure_recon_monitor:
+  enabled: true
+  threshold: 6
+  window_seconds: 900
 
 eye_of_ender_protection:
   enabled: true

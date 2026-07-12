@@ -10,12 +10,14 @@ import me.legendcraft.antiseedcracker.listeners.EndCityProtector;
 import me.legendcraft.antiseedcracker.listeners.EndSpikeProtector;
 import me.legendcraft.antiseedcracker.listeners.EyeOfEnderProtector;
 import me.legendcraft.antiseedcracker.listeners.PlayerSessionListener;
+import me.legendcraft.antiseedcracker.listeners.SlimeChunkObfuscator;
+import me.legendcraft.antiseedcracker.listeners.StructureReconMonitor;
 import me.legendcraft.antiseedcracker.packets.LoginPacketInterceptor;
 import me.legendcraft.antiseedcracker.packets.MapSeedInterceptor;
 import me.legendcraft.antiseedcracker.packets.RespawnPacketInterceptor;
 import me.legendcraft.antiseedcracker.scheduler.FoliaSchedulerUtil;
+import me.legendcraft.antiseedcracker.seed.SeedIntegrityMonitor;
 import me.legendcraft.antiseedcracker.seed.SeedManager;
-import me.legendcraft.antiseedcracker.seed.WorldSeedInterceptor;
 import me.legendcraft.antiseedcracker.tasks.SeedBroadcastTask;
 import me.legendcraft.antiseedcracker.tasks.SeedRotationTask;
 import me.legendcraft.antiseedcracker.util.PlatformUtil;
@@ -40,13 +42,15 @@ public final class AntiSeedCrackerPlugin extends JavaPlugin {
     private SeedBroadcastTask seedBroadcastTask;
     private SeedRotationTask  seedRotationTask;
 
-    private WorldSeedInterceptor worldSeedInterceptor;
+    private SeedIntegrityMonitor seedIntegrityMonitor;
 
     private PlayerSessionListener     playerSessionListener;
     private CommandProtectionListener commandProtectionListener;
     private EyeOfEnderProtector       eyeOfEnderProtector;
     private EndSpikeProtector         endSpikeProtector;
     private EndCityProtector          endCityProtector;
+    private SlimeChunkObfuscator      slimeChunkObfuscator;
+    private StructureReconMonitor     structureReconMonitor;
 
     @Override
     public void onLoad() {
@@ -86,7 +90,7 @@ public final class AntiSeedCrackerPlugin extends JavaPlugin {
             updateChecker.checkAsync();
         }
 
-        worldSeedInterceptor = new WorldSeedInterceptor(getLogger());
+        seedIntegrityMonitor = new SeedIntegrityMonitor(getLogger());
 
         seedBroadcastTask = new SeedBroadcastTask(this);
         seedBroadcastTask.start();
@@ -119,12 +123,16 @@ public final class AntiSeedCrackerPlugin extends JavaPlugin {
     private void setupMetrics() {
         Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
         metrics.addCustomChart(new SimplePie("platform_type", PlatformUtil::name));
-        metrics.addCustomChart(new SimplePie("plugin_api_protection_active",
-                () -> worldSeedInterceptor.isAvailable() ? "active" : "inactive"));
+        metrics.addCustomChart(new SimplePie("seed_integrity_monitor_enabled",
+                () -> pluginConfig.isSeedIntegrityMonitorEnabled() ? "enabled" : "disabled"));
         metrics.addCustomChart(new SimplePie("seed_rotation_enabled",
                 () -> pluginConfig.isSeedRotationEnabled() ? "enabled" : "disabled"));
         metrics.addCustomChart(new SimplePie("audit_log_enabled",
                 () -> databaseManager != null ? "enabled" : "disabled"));
+        metrics.addCustomChart(new SimplePie("slime_chunk_obfuscation_enabled",
+                () -> pluginConfig.isSlimeChunkObfuscationEnabled() ? "enabled" : "disabled"));
+        metrics.addCustomChart(new SimplePie("structure_recon_monitor_enabled",
+                () -> pluginConfig.isStructureReconMonitorEnabled() ? "enabled" : "disabled"));
     }
 
     @Override
@@ -197,6 +205,16 @@ public final class AntiSeedCrackerPlugin extends JavaPlugin {
             endCityProtector = new EndCityProtector(this);
             pm.registerEvents(endCityProtector, this);
         }
+
+        if (pluginConfig.isSlimeChunkObfuscationEnabled()) {
+            slimeChunkObfuscator = new SlimeChunkObfuscator(this);
+            pm.registerEvents(slimeChunkObfuscator, this);
+        }
+
+        if (pluginConfig.isStructureReconMonitorEnabled()) {
+            structureReconMonitor = new StructureReconMonitor(this);
+            pm.registerEvents(structureReconMonitor, this);
+        }
     }
 
     private void unregisterListeners() {
@@ -205,11 +223,14 @@ public final class AntiSeedCrackerPlugin extends JavaPlugin {
         if (eyeOfEnderProtector       != null) { eyeOfEnderProtector.unregister();       eyeOfEnderProtector       = null; }
         if (endSpikeProtector         != null) { endSpikeProtector.unregister();         endSpikeProtector         = null; }
         if (endCityProtector          != null) { endCityProtector.unregister();          endCityProtector          = null; }
+        if (slimeChunkObfuscator      != null) { slimeChunkObfuscator.unregister();      slimeChunkObfuscator      = null; }
+        if (structureReconMonitor     != null) { structureReconMonitor.unregister();     structureReconMonitor     = null; }
     }
 
-    public PluginConfig        getPluginConfig()          { return pluginConfig; }
-    public SeedManager         getSeedManager()           { return seedManager; }
-    public WorldSeedInterceptor getWorldSeedInterceptor() { return worldSeedInterceptor; }
-    public DatabaseManager     getDatabaseManager()       { return databaseManager; }
-    public UpdateChecker       getUpdateChecker()         { return updateChecker; }
+    public PluginConfig          getPluginConfig()          { return pluginConfig; }
+    public SeedManager           getSeedManager()           { return seedManager; }
+    public SeedIntegrityMonitor  getSeedIntegrityMonitor()  { return seedIntegrityMonitor; }
+    public StructureReconMonitor getStructureReconMonitor() { return structureReconMonitor; }
+    public DatabaseManager       getDatabaseManager()       { return databaseManager; }
+    public UpdateChecker         getUpdateChecker()         { return updateChecker; }
 }

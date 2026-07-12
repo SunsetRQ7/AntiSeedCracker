@@ -166,6 +166,7 @@ public final class DatabaseManager {
         TREASURE_MAP_SCRAMBLED,
         SEED_PACKET_SPOOFED,
         END_SPIKE_PROTECTED,
-        END_CITY_PROTECTED
+        END_CITY_PROTECTED,
+        STRUCTURE_RECON_FLAGGED
     }
 }

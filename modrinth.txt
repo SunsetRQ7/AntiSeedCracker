@@ -14,25 +14,31 @@ Once a player knows your world seed, they can compute the exact location of ever
 
 - **Packet-level seed spoofing** — replaces the hashed seed in JOIN_GAME and RESPAWN packets with a per-player, cryptographically random fake before it ever leaves the server (Netty-level via bundled PacketEvents).
 - **Dynamic seed rotation** — every player's fake seed rotates on a configurable interval, defeating crackers that accumulate data across sessions.
-- **Plugin API protection** — patches the internal seed field every second, so even other plugins calling `World.getSeed()` receive a fake value.
+- **Seed integrity monitor** — read-only watchdog that verifies the real generation seed never drifts. AntiSeedCracker does not, and will not, write to your world's actual generation seed — see "Safe for your world" below.
 - **Eye of Ender redirection** — thrown Eyes fly toward a per-player fake stronghold with randomized angular jitter, making triangulation useless.
 - **/locate spoofing** — returns convincing fake coordinates; stronghold queries stay consistent with Eye of Ender behavior.
 - **Seed command blocking** — /seed and friends are blocked for players, console, RCON, and stripped from tab-complete.
 - **End spike randomization** — shuffles the bedrock cap heights of the ten End pillars, destroying the vanilla height fingerprint that uniquely identifies a seed.
-- **End City fingerprint removal** — replaces the distinctive magenta glass pattern in End Cities.
+- **End City fingerprint removal** — replaces the distinctive magenta glass pattern in End Cities (scoped to the structure's bounding box, not the whole chunk).
 - **Treasure & explorer map scrambling** — structure icons on maps are randomized in the MAP_DATA packet.
+- **Structure reconnaissance monitor** — logs (never blocks) suspicious multi-structure visitation patterns matching known seed-cracking tool behavior.
+- **Slime chunk obfuscation** (opt-in) — denies slime-chunk-sampling-based cracking at the cost of disabling slime farms where enabled.
 - **Audit log** — every blocked attempt is recorded to a lightweight flat-file log, with /asc stats summaries in-game.
 
 ## Never punishes players
 
-AntiSeedCracker follows a strict no-punishment philosophy: no kicks, no bans, no warnings. Cheat tools silently fail while legitimate gameplay is completely unaffected.
+AntiSeedCracker follows a strict no-punishment philosophy: no kicks, no bans. Cheat tools silently fail while legitimate gameplay is completely unaffected.
 
 ## Safe for your world
 
-- The real seed is never read into logs, files, or network traffic.
-- World generation is never altered — protection happens at the packet and API layer.
+- The real seed is never read into logs, files, or network traffic, and is never rewritten by this plugin.
+- An earlier internal design continuously overwrote the live in-memory generation seed to spoof `World.getSeed()` for other plugins. That approach was removed in 3.3.0 after we found it could corrupt chunk decoration on affected servers — Minecraft re-reads that field fresh for every chunk it generates, not just once at world load. The plugin now only ever reads that value, never writes it.
 - Optional cosmetic changes (End spike caps, End City glass) are single-block, physics-free, run at most once per chunk, and can be disabled in the config.
-- Verified by live testing on Paper 26.1.2 and Folia 26.1.2 with zero errors and untouched world generation.
+- Verified by live testing on Paper 26.1.2 and Folia 26.1.2: zero errors, and the real seed confirmed byte-for-byte intact on disk after extended runtime.
+
+## Honest limits
+
+No plugin can make a seed truly uncrackable against tools like SeedCrackerX, which reconstruct it from the real coordinates of structures a player has legitimately explored — that's not a network exploit, and coordinates can't be hidden from a player standing at their own position. AntiSeedCracker closes every server-side leak we're aware of (packet spoofing, triangulation, command access, structure fingerprinting) and adds detection for cracking-pattern behavior, but exploration-based cracking is a limit of the genre, not something this plugin claims to solve.
 
 ## Performance
 
@@ -51,7 +57,7 @@ Spigot/CraftBukkit and legacy Minecraft versions (1.16.5 – 25.x) are not suppo
 
 ## Quick start
 
-1. Drop `AntiSeedCracker-3.2.0.jar` into your `plugins/` folder.
+1. Drop `AntiSeedCracker-3.3.0.jar` into your `plugins/` folder.
 2. Restart the server. Protection is active immediately with sensible defaults.
 3. Optionally tune `plugins/AntiSeedCracker/config.yml` (every layer, world list, message, and interval is configurable) and apply with `/asc reload`.
 
