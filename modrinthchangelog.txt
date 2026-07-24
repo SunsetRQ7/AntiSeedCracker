@@ -1,0 +1,88 @@
+## 3.5.0.1 — 2026-07-22
+
+**Fixed**
+- Fixed Eye of Ender redirection not actually holding: thrown eyes had their initial velocity redirected toward the fake stronghold, but Minecraft's own homing behavior would curve them back toward the real stronghold's direction within a second or two of flight. The eye's target location is now redirected as well, so it flies toward the fake stronghold for its entire flight, not just its first moment in the air.
+- Fixed the fake stronghold location silently changing for online players on `/asc reload` or `/asc toggle`, which could make a previously consistent `/locate stronghold` or Eye of Ender answer jump to a new location with no world change. Each player now keeps the same fake stronghold for their whole session, exactly as intended.
+
+---
+
+## 3.5.0 — 2026-07-22
+
+**Fixed**
+- Fixed a compiler/target mismatch that prevented a clean build from source (build now correctly targets Java 25, matching the bundled Folia API).
+- Fixed an `/execute`-wrapped bypass of the seed-command blocker: `/execute run seed` (including nested chains and dimension switches like `/execute in minecraft:the_end run seed`) previously slipped past the blocker because `/execute` re-dispatches its inner command internally. Blocked commands are now resolved recursively through `/execute` chains before the check runs.
+- Fixed `/asc stats` occasionally attaching its output to the next RCON command's response due to an async delay. Console/RCON senders now get a synchronous reply; player replies remain async to avoid blocking on file I/O.
+- Fixed console log lines (em-dashes, box-drawing characters) rendering as garbled text on Windows consoles.
+- Fixed `/locate` returning a brand-new fake location on every repeated query for the same structure, which could tip off a suspicious player. Results are now stable per player and structure.
+- Fixed treasure/explorer map icons visibly jumping to a new fake position on every map refresh. The fake position is now stable per map.
+- Fixed unbounded memory growth in the structure reconnaissance monitor's per-chunk cache — entries are now evicted when their chunk unloads.
+- Fixed a namespace-stripping bug in `extra_blocked_commands` matching that could mismatch commands containing a colon later in the argument string.
+- Synced version numbers across `pom.xml`, `plugin.yml`, and `README.md`, and removed a stale reference to a feature already removed back in 3.3.0.
+
+**Added**
+- `/asc toggle <feature> [true|false]` — flip any protection layer on or off live, persisted to `config.yml`, no reload required.
+- New granular permissions: `antiseedcracker.admin.status` (read-only) and `antiseedcracker.admin.manage` (reload/toggle) — both still covered by the existing `antiseedcracker.admin` permission, so existing setups keep working unchanged.
+- `/asc help` — lists only the subcommands the sender actually has permission to use.
+- New Command Probing Monitor: logs (never blocks — same philosophy as every other detection layer in this plugin) when a player triggers several blocked seed commands in a short window, a pattern consistent with a script or macro probing for a bypass.
+- `structure_recon_monitor.tracked_structures` is now configurable, and now includes Buried Treasure by default.
+
+---
+
+## 3.3.1 — 2026-07-12
+
+**Fixed**
+- Fixed a thread-visibility bug where `/asc reload` updated config/database state in a way that wasn't reliably visible to packet-handling and async threads.
+- Fixed `extra_blocked_commands` entries with mixed-case letters silently failing to match.
+- Fixed repeated, uncached structure lookups on every chunk crossing for every player — lookups are now cached per chunk.
+- Fixed the audit log opening and closing a file handle for every single event; it now keeps a persistent writer and only rotates on date change.
+- Added Ancient City to the tracked structure set.
+- Removed dead code left over from a previously removed feature.
+- Verified live on Paper 26.1.2-74 and Folia 26.1.2-8 with zero errors; real seed confirmed byte-for-byte intact on disk after extended runtime.
+
+---
+
+## 3.3.0 — 2026-07-11
+
+**Fixed**
+- **Critical fix**: removed a feature that patched the live world seed in memory once per second. That value is re-read by vanilla chunk decoration (trees, ores, structure placement) fresh for every chunk generated, not just once at world load — so any chunk decorated while it held a fake value generated incorrectly instead of from the real seed. This was the root cause of reports of broken chunk generation.
+- Replaced it with a read-only Seed Integrity Monitor that only ever reads the world seed and warns if it drifts — it never writes to it.
+- End City protection now scans only the structure's bounding box instead of the entire chunk column, reducing overhead on large servers.
+- Reduced the player-seed safety-net task's interval from every 1 second to every 15 seconds.
+
+**Added**
+- Structure Reconnaissance Monitor (audit-log only — never blocks or punishes players).
+- Optional Slime Chunk Obfuscation (off by default).
+
+**Notes**
+- Ore/block ESP protection (X-ray, storage ESP) is intentionally out of scope for this plugin — use your server software's built-in anti-X-ray instead.
+
+---
+
+## 3.2.0 — 2026-07-04
+
+**Added**
+- Anonymous usage metrics (bStats), with platform and protection-layer charts.
+- Configurable seed-blocked messages in `config.yml`.
+- `/asc reload` now applies database enable/disable without a restart.
+
+**Changed**
+- Upgraded PacketEvents 2.12.2 → 2.13.0.
+
+**Verified**
+- Live-tested with zero errors on Paper 26.1.2-72 and Folia 26.1.2-8.
+
+---
+
+## 3.1.1 — 2026-06-13
+
+**Fixed**
+- Fixed a `NoClassDefFoundError` on Folia/Paper caused by a missing bundled dependency.
+
+**Changed**
+- Upgraded PacketEvents 2.12.0 → 2.12.2.
+
+---
+
+## 3.1.0 — 2026-06-13
+
+Initial release: professional multi-layer world seed protection for Paper, Purpur, and Folia.

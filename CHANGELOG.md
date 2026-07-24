@@ -3,6 +3,30 @@
 All notable changes to AntiSeedCracker are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.5.0.1] - 2026-07-22
+
+### Fixed
+- **Eye of Ender redirection didn't actually hold**: `EyeOfEnderProtector` only ever set the
+  thrown eye's *velocity* toward the fake stronghold. Vanilla's `EnderSignal` entity is
+  constructed with a target location pointing at the **real** stronghold before
+  `ProjectileLaunchEvent` even fires, and re-accelerates toward that stored target every
+  tick on its own — independent of whatever velocity a plugin sets once at launch. Without
+  calling `EnderSignal#setTargetLocation`, the eye would curve back toward the true bearing
+  within a second or two of flight, regardless of the initial jitter, leaking the real
+  direction to anything tracking the eye's trajectory rather than just its launch frame.
+  Now sets the target location (with a plausible, per-player-stable fake Y as well as
+  x/z) in addition to velocity, on both the primary and Folia-retry code paths.
+- **Fake stronghold silently moved on every `/asc reload`/`/asc toggle`**: `initPlayer()`
+  unconditionally re-rolled each online player's fake stronghold every time it ran, which
+  includes on every reload and every `/asc toggle` (which reloads internally) — not just on
+  join. An admin flipping one unrelated toggle would make a previously-consistent `/locate
+  stronghold` or Eye of Ender answer jump to a new location with no world change, undermining
+  the exact consistency guarantee 3.5.0 added `getOrAssignFakeStructureLocation` to provide.
+  Now only assigns a fake stronghold the first time a player is seen; already-assigned
+  players keep theirs across reloads. `SeedManager` gained `hasFakeStronghold`/
+  `getFakeStrongholdY` to support this.
+- Verified with a clean `mvn clean package` on JDK 25 after both fixes.
+
 ## [3.5.0] - 2026-07-22
 
 Live-tested end to end on a real Paper 26.1.2 server via RCON (repeated boots, every

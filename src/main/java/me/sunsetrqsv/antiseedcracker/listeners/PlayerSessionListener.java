@@ -54,11 +54,19 @@ public final class PlayerSessionListener implements Listener {
 
     public void initPlayer(Player player) {
         plugin.getSeedManager().assignSeed(player);
-        plugin.getSeedManager().assignFakeStronghold(
-                player,
-                plugin.getPluginConfig().getFakeStrongholdMinDist(),
-                plugin.getPluginConfig().getFakeStrongholdMaxDist()
-        );
+
+        // Only assign on first sight of this player. initPlayer() also re-runs for every
+        // already-online player on /asc reload (and /asc toggle, which reloads internally) -
+        // unconditionally reassigning here would silently move an online player's fake
+        // stronghold on every unrelated config change, defeating the very answer-consistency
+        // /locate and Eye of Ender redirection depend on to not tip off a suspicious player.
+        if (!plugin.getSeedManager().hasFakeStronghold(player.getUniqueId())) {
+            plugin.getSeedManager().assignFakeStronghold(
+                    player,
+                    plugin.getPluginConfig().getFakeStrongholdMinDist(),
+                    plugin.getPluginConfig().getFakeStrongholdMaxDist()
+            );
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

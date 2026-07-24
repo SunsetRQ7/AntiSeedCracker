@@ -47,19 +47,44 @@ public final class SeedManager {
         }
     }
 
+    /**
+     * Assigns a fake stronghold (x, y, z) to the player, replacing any previous one.
+     * The y is a plausible stronghold-band height so {@link org.bukkit.entity.EnderSignal}
+     * can be given a full 3D target location, not just a horizontal bearing.
+     */
     public int[] assignFakeStronghold(Player player, int minDist, int maxDist) {
         double angle  = rng.nextDouble() * 2.0 * Math.PI;
         int    dist   = minDist + rng.nextInt(Math.max(1, maxDist - minDist + 1));
         int    x      = (int) Math.round(Math.cos(angle) * dist);
         int    z      = (int) Math.round(Math.sin(angle) * dist);
-        fakeStrongholds.put(player.getUniqueId(), new long[]{x, z});
+
+        int minY = player.getWorld().getMinHeight() + 8;
+        int maxY = Math.max(minY + 1, Math.min(player.getWorld().getMaxHeight() - 8, minY + 72));
+        int y    = minY + rng.nextInt(maxY - minY);
+
+        fakeStrongholds.put(player.getUniqueId(), new long[]{x, y, z});
         return new int[]{x, z};
     }
 
+    /** Horizontal (x, z) of the player's fake stronghold, or {@code null} if none assigned yet. */
     public int[] getFakeStronghold(UUID uuid) {
         long[] packed = fakeStrongholds.get(uuid);
         if (packed == null) return null;
-        return new int[]{(int) packed[0], (int) packed[1]};
+        return new int[]{(int) packed[0], (int) packed[2]};
+    }
+
+    /**
+     * Y of the player's fake stronghold, for continuous Eye of Ender homing (see
+     * {@code EyeOfEnderProtector}). Returns {@code fallback} if none has been assigned yet.
+     */
+    public int getFakeStrongholdY(UUID uuid, int fallback) {
+        long[] packed = fakeStrongholds.get(uuid);
+        return packed != null ? (int) packed[1] : fallback;
+    }
+
+    /** True if this player already has a fake stronghold assigned. */
+    public boolean hasFakeStronghold(UUID uuid) {
+        return fakeStrongholds.containsKey(uuid);
     }
 
     /**

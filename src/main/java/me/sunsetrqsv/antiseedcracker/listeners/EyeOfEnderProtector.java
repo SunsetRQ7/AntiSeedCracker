@@ -39,6 +39,7 @@ public final class EyeOfEnderProtector implements Listener {
         UUID shooterUUID = shooterPlayer != null ? shooterPlayer.getUniqueId() : null;
 
         final int[] fakeTarget;
+        final int   targetY;
         if (shooterUUID != null) {
             int[] stored = plugin.getSeedManager().getFakeStronghold(shooterUUID);
             if (stored != null) {
@@ -50,6 +51,7 @@ public final class EyeOfEnderProtector implements Listener {
                         plugin.getPluginConfig().getFakeStrongholdMaxDist()
                 );
             }
+            targetY = plugin.getSeedManager().getFakeStrongholdY(shooterUUID, eye.getLocation().getBlockY());
         } else {
             int    min   = plugin.getPluginConfig().getFakeStrongholdMinDist();
             int    max   = plugin.getPluginConfig().getFakeStrongholdMaxDist();
@@ -59,6 +61,9 @@ public final class EyeOfEnderProtector implements Listener {
                 (int) Math.round(Math.cos(angle) * dist),
                 (int) Math.round(Math.sin(angle) * dist)
             };
+            int minY = world.getMinHeight() + 8;
+            int maxY = Math.max(minY + 1, Math.min(world.getMaxHeight() - 8, minY + 72));
+            targetY  = minY + RNG.nextInt(maxY - minY);
         }
 
         final int targetX = fakeTarget[0];
@@ -90,6 +95,13 @@ public final class EyeOfEnderProtector implements Listener {
                     jz * speed
             ));
 
+            // Critical: vanilla EnderSignal re-accelerates toward its target location every
+            // tick on its own, independent of whatever velocity we just set. That target was
+            // already set to the REAL stronghold before this event ever fired (the entity is
+            // constructed with it), so without this call the eye would curve back toward the
+            // true bearing within a second or two regardless of the jitter above.
+            eye.setTargetLocation(new Location(world, targetX + 0.5, targetY, targetZ + 0.5));
+
             DatabaseManager db = plugin.getDatabaseManager();
             if (db != null && plugin.getPluginConfig().isDatabaseLogEvents()
                     && shooterPlayer != null) {
@@ -120,6 +132,7 @@ public final class EyeOfEnderProtector implements Listener {
                             eye.getVelocity().getY(),
                             (ndx * sin + ndz * cos) * speed
                     ));
+                    eye.setTargetLocation(new Location(world, targetX + 0.5, targetY, targetZ + 0.5));
                 } catch (Exception ignored) {}
             });
         }
