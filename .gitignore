@@ -12,3 +12,5 @@ hs_err_pid*.log
 Thumbs.db
 dependency-reduced-pom.xml
 META-INF/
+.vscode/
+.claude/

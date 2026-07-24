@@ -1,23 +1,33 @@
 name: AntiSeedCracker
-version: '3.3.1'
-main: me.legendcraft.antiseedcracker.AntiSeedCrackerPlugin
+version: '3.5.0'
+main: me.sunsetrqsv.antiseedcracker.AntiSeedCrackerPlugin
 api-version: '26.1'
 folia-supported: true
 author: SunsetRQ7_
 description: >
   Professional world seed protection plugin for Paper, Purpur, and Folia 26.1.2+.
-  Blocks every known seed-cracking technique: packet-level spoofing, structure
-  triangulation, Eye of Ender tracking, /locate exploitation, treasure maps,
-  End spike fingerprinting, End City fingerprinting, and plugin-API interception.
+  Blocks every known seed-cracking leak vector: packet-level hashed-seed spoofing,
+  /seed and /locate command blocking (including /execute-wrapped bypass attempts),
+  Eye of Ender triangulation, treasure/explorer map scrambling, End spike and End
+  City fingerprinting, slime-chunk sampling, and non-punishing detection of
+  structure-reconnaissance and command-probing patterns used by seed-cracking tools.
 
 commands:
   asc:
     aliases: [antiseedcracker]
     description: AntiSeedCracker administration command.
-    usage: /asc <reload|status|stats|info>
-    permission: antiseedcracker.admin
+    usage: /asc <reload|toggle|status|stats|info|help>
 
 permissions:
   antiseedcracker.admin:
-    description: Access to AntiSeedCracker administration commands.
+    description: Full access to all AntiSeedCracker administration commands.
+    default: op
+    children:
+      antiseedcracker.admin.status: true
+      antiseedcracker.admin.manage: true
+  antiseedcracker.admin.status:
+    description: View-only access — /asc status, /asc stats, /asc info, /asc help.
+    default: op
+  antiseedcracker.admin.manage:
+    description: Access to /asc reload and /asc toggle (changes live config).
     default: op

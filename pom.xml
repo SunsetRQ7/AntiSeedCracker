@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.legendcraft</groupId>
+    <groupId>me.sunsetrqsv</groupId>
     <artifactId>AntiSeedCracker</artifactId>
-    <version>3.3.1</version>
+    <version>3.5.0</version>
     <packaging>jar</packaging>
 
     <name>AntiSeedCracker</name>
@@ -99,15 +99,15 @@
                     <relocations>
                         <relocation>
                             <pattern>com.github.retrooper.packetevents</pattern>
-                            <shadedPattern>me.legendcraft.antiseedcracker.lib.packetevents</shadedPattern>
+                            <shadedPattern>me.sunsetrqsv.antiseedcracker.lib.packetevents</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>io.github.retrooper.packetevents</pattern>
-                            <shadedPattern>me.legendcraft.antiseedcracker.lib.packetevents.impl</shadedPattern>
+                            <shadedPattern>me.sunsetrqsv.antiseedcracker.lib.packetevents.impl</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.bstats</pattern>
-                            <shadedPattern>me.legendcraft.antiseedcracker.lib.bstats</shadedPattern>
+                            <shadedPattern>me.sunsetrqsv.antiseedcracker.lib.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                     <transformers>
