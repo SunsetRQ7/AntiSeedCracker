@@ -31,7 +31,7 @@ public final class SeedRotationTask implements Runnable {
     @Override
     public void run() {
         int count = plugin.getSeedManager().rotateAll();
-        if (count > 0) {
+        if (count > 0 && plugin.getPluginConfig().isSeedRotationLogEnabled()) {
             plugin.getLogger().info(
                     "[AntiSeedCracker] Rotated fake seeds for " + count + " player(s).");
         }
