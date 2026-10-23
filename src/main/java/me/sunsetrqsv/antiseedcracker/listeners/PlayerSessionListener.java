@@ -78,9 +78,11 @@ public final class PlayerSessionListener implements Listener {
         String locateCommand = resolveLocateCommand(normalized);
         if (locateCommand == null) return;
 
+        Player player       = event.getPlayer();
+        if (!player.hasPermission("minecraft.command.locate")) return;
+
         event.setCancelled(true);
 
-        Player player       = event.getPlayer();
         String structureArg = extractStructureArg(locateCommand);
         int[]  fakeCoords   = buildFakeLocateCoords(player, structureArg);
         int    fakeX        = fakeCoords[0];

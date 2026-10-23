@@ -26,6 +26,7 @@ public final class PluginConfig {
 
     private final boolean seedRotationEnabled;
     private final long    seedRotationIntervalSeconds;
+    private final boolean seedRotationLogEnabled;
 
     private final boolean      endSpikesEnabled;
     private final List<String> endSpikeWorlds;
@@ -78,6 +79,7 @@ public final class PluginConfig {
         this.seedRotationEnabled = cfg.getBoolean("seed_rotation.enabled", true);
         this.seedRotationIntervalSeconds = Math.max(30L,
                 cfg.getLong("seed_rotation.interval_seconds", 60L));
+        this.seedRotationLogEnabled = cfg.getBoolean("seed_rotation.log_rotation", false);
 
         this.endSpikesEnabled     = cfg.getBoolean("structure_protection.end_spikes.enabled",      true);
         this.endSpikeWorlds       = Collections.unmodifiableList(
@@ -156,6 +158,7 @@ public final class PluginConfig {
 
     public boolean isSeedRotationEnabled()          { return seedRotationEnabled; }
     public long    getSeedRotationIntervalSeconds() { return seedRotationIntervalSeconds; }
+    public boolean isSeedRotationLogEnabled()       { return seedRotationLogEnabled; }
 
     public boolean      isEndSpikesEnabled()     { return endSpikesEnabled; }
     public List<String> getEndSpikeWorlds()      { return endSpikeWorlds; }

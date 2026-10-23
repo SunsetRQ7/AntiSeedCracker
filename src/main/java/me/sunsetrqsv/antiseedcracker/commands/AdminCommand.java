@@ -49,6 +49,7 @@ public final class AdminCommand implements CommandExecutor, TabCompleter {
         m.put("treasuremap", "treasure_map_protection.enabled");
         m.put("database",    "database.enabled");
         m.put("probing",     "command_probing_monitor.enabled");
+        m.put("rotationlog", "seed_rotation.log_rotation");
         return Collections.unmodifiableMap(m);
     }
 

@@ -5,6 +5,7 @@ seed_obfuscation:
 seed_rotation:
   enabled: true
   interval_seconds: 60
+  log_rotation: false
 
 structure_protection:
 
